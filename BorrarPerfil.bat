@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 setlocal
 chcp 65001 >nul
 title Borrar perfil de Windows
@@ -18,12 +18,22 @@ echo   BORRAR UN PERFIL DE WINDOWS POR COMPLETO
 echo   Paso 1: escanea (no toca nada) y arma el checklist
 echo   Paso 2: si confirmas, borra todo y vuelve a escanear
 echo ================================================================
-echo.
-echo Perfiles de esta PC:
-powershell -NoProfile -Command "Get-CimInstance Win32_UserProfile | Where-Object { -not $_.Special } | ForEach-Object { '   {0,-28} en uso: {1}' -f (Split-Path $_.LocalPath -Leaf), $_.Loaded }"
-echo.
-set /p "USUARIO=Nombre del usuario a borrar (tal cual aparece arriba): "
+
+rem --- Menu interactivo numerado de perfiles
+set "TEMP_USER=%TEMP%\perfil_elegido_%RANDOM%.txt"
+if exist "%TEMP_USER%" del "%TEMP_USER%" 2>nul
+
+powershell -NoProfile -ExecutionPolicy Bypass -Command "& { $perfiles = @(Get-CimInstance Win32_UserProfile | Where-Object { -not $_.Special } | ForEach-Object { Split-Path $_.LocalPath -Leaf } | Where-Object { $_ -notin @('Administrador', 'Administrator', 'Public', 'Default', 'Todos', 'All Users') }); if ($perfiles.Count -eq 0) { Write-Host 'No se encontraron perfiles para borrar.' -ForegroundColor Yellow; exit 0 }; Write-Host ''; Write-Host 'Perfiles disponibles en este equipo:' -ForegroundColor Cyan; for ($i = 0; $i -lt $perfiles.Count; $i++) { $p = $perfiles[$i]; $wmi = Get-CimInstance Win32_UserProfile | Where-Object { (Split-Path $_.LocalPath -Leaf) -ieq $p } | Select-Object -First 1; $enUso = if ($wmi -and $wmi.Loaded) { 'SÍ (en uso)' } else { 'No' }; Write-Host ('  [{0}] {1,-26} (en uso: {2})' -f ($i + 1), $p, $enUso) }; Write-Host '  [0] Salir sin hacer nada'; Write-Host ''; while ($true) { $sel = Read-Host 'Elegí el número del perfil a borrar'; if ($sel -eq '0') { exit 0 }; if ($sel -match '^\d+$' -and [int]$sel -ge 1 -and [int]$sel -le $perfiles.Count) { $elegido = $perfiles[[int]$sel - 1]; [IO.File]::WriteAllText('%TEMP_USER%', $elegido); break }; Write-Host 'Opción no válida, intentá de nuevo.' -ForegroundColor Red } }"
+
+if not exist "%TEMP_USER%" goto fin
+set /p "USUARIO="<"%TEMP_USER%"
+del "%TEMP_USER%" 2>nul
 if "%USUARIO%"=="" goto fin
+
+echo.
+echo ================================================================
+echo   Perfil seleccionado: %USUARIO%
+echo ================================================================
 
 echo.
 echo ---------------- PASO 1: ESCANEO ----------------

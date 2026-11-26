@@ -10,16 +10,19 @@
 #>
 [CmdletBinding()]
 param(
-  [Parameter(Mandatory)][string]$Usuario,
+  [Parameter(Mandatory=$false)][string]$Usuario,
   [ValidateSet('Escanear', 'Borrar')][string]$Modo = 'Escanear',
   [switch]$BorrarCuenta,
   [switch]$SinConfirmar,
   [switch]$SinRegistroCompleto,   # salta la busqueda en todo el registro (mas rapido, menos completo)
-  [string]$Informes = (Join-Path $PSScriptRoot 'informes')
+  [string]$Informes = ''
 )
 
 $ErrorActionPreference = 'Stop'
 $Version = '1.0.0'
+$dirScript = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
+if (-not $dirScript) { $dirScript = (Get-Location).Path }
+if (-not $Informes) { $Informes = Join-Path $dirScript 'informes' }
 $ProfileList = 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList'
 
 function Test-Admin {
@@ -334,7 +337,7 @@ if ($o.Sid -match '^S-1-5-(18|19|20)$' -or $o.Sid -match '-500$') { $frenos += '
 if ($Usuario -in 'Default', 'Public', 'Administrador', 'Administrator', 'Todos', 'All Users', 'Default User') { $frenos += 'Es una carpeta o cuenta especial de Windows.' }
 if ($o.Perfil -and $o.Perfil.Special) { $frenos += 'Windows lo marca como perfil especial.' }
 if ($o.Perfil -and $o.Perfil.Loaded) { $frenos += 'El perfil esta en uso (sesion abierta). Cerrar su sesion o reiniciar.' }
-$aqui = $PSScriptRoot.TrimEnd('\') + '\'
+$aqui = $dirScript.TrimEnd('\') + '\'
 if ($aqui -like ($o.Ruta.TrimEnd('\') + '\*') -or ((Resolve-Path $Informes -ErrorAction SilentlyContinue) -and $Informes -like ($o.Ruta.TrimEnd('\') + '\*'))) { $frenos += "El script esta DENTRO del perfil a borrar. Copiar la carpeta a C:\BorrarPerfil y correrlo desde ahi." }
 $sesiones = (quser 2>$null) -join "`n"
 if ($sesiones -match ('(?im)^\s*>?' + [regex]::Escape($Usuario) + '\s')) { $frenos += 'El usuario tiene una sesion abierta (quser).' }

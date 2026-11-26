@@ -82,4 +82,5 @@ Salidas: 0 bien · 2 quedaron restos · 3 no existe · 4 hay frenos · 5 sin adm
 
 ## Versiones
 
+- **1.1.0** (25/11/2026): menú interactivo numerado en `BorrarPerfil.bat` (sin tener que tipear nombres con espacios a mano); corrección de inicialización de `$Informes` en PowerShell 5.1; validación de eliminación completa en `regedit` (`ProfileList` sin `.bak` para evitar cualquier intento de restauración de perfil).
 - **1.0.0** (25/11/2026): escáner + checklist + borrado + verificación + prueba completa.

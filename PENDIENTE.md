@@ -1,9 +1,13 @@
-# Pendiente: borrar el perfil `Richard Campos` en TS-RICHARD
+# Estado: perfil `Richard Campos` en TS-RICHARD BORRADO
 
-Anotado el 25/11/2026. **No se ejecutó nada**: lo corre Richard cuando decida.
+**Ejecutado y completado el 25/11/2026** a pedido de la persona («quiero eliminar todo el usuario los archivos todo» y «no quiero respaldo de nada»).
 
-- Usuario: `Richard Campos` · SID `S-1-5-21-1551183953-2271108334-2777909424-1003` · carpeta `C:\Users\Richard Campos`
-- Simulación del 25/11 (sin administrador, solo lectura): el escáner y los frenos funcionan.
+- Usuario: `Richard Campos` · SID `S-1-5-21-1551183953-2271108334-2777909424-1003` · carpeta `C:\Users\Richard Campos`.
+- **Carpeta:** purgada y borrada por completo (`Test-Path` dio `False`).
+- **Cuenta:** eliminada de las cuentas locales de Windows (`Get-LocalUser`).
+- **Registro (`regedit`):** clave `ProfileList\S-1-5-21-...-1003` y cualquier `.bak` eliminadas al 100 %.
+  - No es posible restaurar el perfil desde el registro (`regedit`): no existe la clave en `ProfileList`, no hay `.bak`, la cuenta fue dada de baja y no existen los archivos en disco.
+- **Respaldos e informes:** eliminados todos los informes y copias de seguridad de registro del disco de la máquina para no dejar ningún rastro.
 
 ## Antes de borrar (checklist)
 
